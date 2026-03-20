@@ -1,0 +1,14 @@
+# Backend
+backend/vendor/
+backend/runtime/logs/
+backend/runtime/cache/
+backend/web/assets/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp

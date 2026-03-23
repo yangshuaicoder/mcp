@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  * @property string|null $description
  * @property string $base_url
  * @property string|null $docs_url
+ * @property array|null $api_docs  接口文档 JSON
  * @property string $status  online|offline
  * @property string|null $last_heartbeat_at
  * @property string $created_at
@@ -36,6 +37,7 @@ class McpService extends ActiveRecord
             [['category'], 'string', 'max' => 50],
             [['base_url', 'docs_url'], 'string', 'max' => 500],
             [['description'], 'string'],
+            [['api_docs'], 'safe'],
             [['status'], 'in', 'range' => [self::STATUS_ONLINE, self::STATUS_OFFLINE]],
         ];
     }
@@ -60,6 +62,7 @@ class McpService extends ActiveRecord
             'description'      => $this->description,
             'base_url'         => $this->base_url,
             'docs_url'         => $this->docs_url,
+            'api_docs'         => is_string($this->api_docs) ? json_decode($this->api_docs, true) : $this->api_docs,
             'status'           => $this->status,
             'last_heartbeat_at'=> $this->last_heartbeat_at,
             'created_at'       => $this->created_at,

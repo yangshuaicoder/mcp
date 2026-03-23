@@ -22,9 +22,22 @@ class ServiceController extends BaseApiController
         $baseUrl     = trim($body['base_url'] ?? '');
         $serverIp    = trim($body['server_ip'] ?? '');
         $projectName = trim($body['project_name'] ?? '');
+        $apiDocs     = $body['api_docs'] ?? null;
 
         if (!$name || !$displayName || !$baseUrl || !$serverIp || !$projectName) {
             return $this->error('name, display_name, base_url, server_ip, project_name 为必填项', 1001);
+        }
+
+        // api_docs 必填，且必须是数组
+        if (empty($apiDocs) || !is_array($apiDocs)) {
+            return $this->error('api_docs 为必填项，须为接口文档数组，格式：[{"method":"POST","path":"/api/xxx","description":"说明"}]', 1002);
+        }
+
+        // 校验每个接口文档条目
+        foreach ($apiDocs as $i => $doc) {
+            if (empty($doc['method']) || empty($doc['path']) || empty($doc['description'])) {
+                return $this->error("api_docs[$i] 缺少必填字段：method, path, description", 1002);
+            }
         }
 
         // Upsert service
@@ -39,6 +52,7 @@ class ServiceController extends BaseApiController
         $service->description       = trim($body['description'] ?? '') ?: null;
         $service->base_url          = $baseUrl;
         $service->docs_url          = trim($body['docs_url'] ?? '') ?: null;
+        $service->api_docs          = json_encode($apiDocs, JSON_UNESCAPED_UNICODE);
         $service->status            = McpService::STATUS_ONLINE;
         $service->last_heartbeat_at = date('Y-m-d H:i:s');
 

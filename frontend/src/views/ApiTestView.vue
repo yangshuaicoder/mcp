@@ -36,6 +36,42 @@
                 <el-form-item label="负责人">
                   <el-input v-model="registerForm.contact" />
                 </el-form-item>
+                <!-- 接口文档 -->
+                <el-divider content-position="left">接口文档（必填）</el-divider>
+                <div v-for="(doc, idx) in apiDocsList" :key="idx" class="api-doc-item">
+                  <div class="api-doc-header">
+                    <span class="api-doc-idx">#{{ idx + 1 }}</span>
+                    <el-button type="danger" size="small" text @click="removeApiDoc(idx)"
+                      :disabled="apiDocsList.length <= 1">删除</el-button>
+                  </div>
+                  <el-row :gutter="8">
+                    <el-col :span="6">
+                      <el-select v-model="doc.method" placeholder="方法" style="width:100%">
+                        <el-option label="GET" value="GET" />
+                        <el-option label="POST" value="POST" />
+                        <el-option label="PUT" value="PUT" />
+                        <el-option label="DELETE" value="DELETE" />
+                      </el-select>
+                    </el-col>
+                    <el-col :span="8">
+                      <el-input v-model="doc.path" placeholder="路径，如 /api/v1/pay" />
+                    </el-col>
+                    <el-col :span="10">
+                      <el-input v-model="doc.description" placeholder="接口说明" />
+                    </el-col>
+                  </el-row>
+                  <el-row :gutter="8" style="margin-top:6px;">
+                    <el-col :span="12">
+                      <el-input v-model="doc.request_params_json" type="textarea" :rows="2"
+                        placeholder='请求参数 JSON（可选），如 [{"name":"order_id","type":"string","required":true,"description":"订单号"}]' />
+                    </el-col>
+                    <el-col :span="12">
+                      <el-input v-model="doc.response_example_json" type="textarea" :rows="2"
+                        placeholder='响应示例 JSON（可选），如 {"code":0,"data":{}}' />
+                    </el-col>
+                  </el-row>
+                </div>
+                <el-button type="primary" text @click="addApiDoc" style="margin-bottom:12px;">+ 添加接口</el-button>
                 <el-form-item>
                   <el-button type="primary" @click="doRegister" :loading="loading">发送注册请求</el-button>
                   <el-button @click="fillRegisterExample">填入示例</el-button>
@@ -188,6 +224,28 @@ const registerForm = reactive({
   name: '', display_name: '', category: '', description: '',
   base_url: '', docs_url: '', server_ip: '', project_name: '', contact: ''
 })
+const apiDocsList = reactive([
+  { method: 'POST', path: '', description: '', request_params_json: '', response_example_json: '' }
+])
+
+function addApiDoc() {
+  apiDocsList.push({ method: 'POST', path: '', description: '', request_params_json: '', response_example_json: '' })
+}
+function removeApiDoc(idx) {
+  if (apiDocsList.length > 1) apiDocsList.splice(idx, 1)
+}
+function buildApiDocs() {
+  return apiDocsList.map(d => {
+    const item = { method: d.method, path: d.path, description: d.description }
+    if (d.request_params_json) {
+      try { item.request_params = JSON.parse(d.request_params_json) } catch (e) { /* skip */ }
+    }
+    if (d.response_example_json) {
+      try { item.response_example = JSON.parse(d.response_example_json) } catch (e) { item.response_example = d.response_example_json }
+    }
+    return item
+  })
+}
 const heartbeatForm = reactive({ name: '', server_ip: '' })
 const unregisterForm = reactive({ name: '', server_ip: '' })
 const queryListForm = reactive({ category: '', keyword: '', status: 'all' })
@@ -204,6 +262,24 @@ function fillRegisterExample() {
     base_url: 'http://10.0.0.1:8080', docs_url: 'http://10.0.0.1:8080/docs',
     server_ip: '10.0.0.1', project_name: 'uni-pay', contact: '张三'
   })
+  apiDocsList.splice(0, apiDocsList.length,
+    {
+      method: 'POST', path: '/api/v1/pay/create', description: '创建支付订单',
+      request_params_json: JSON.stringify([
+        { name: 'order_id', type: 'string', required: true, description: '订单号' },
+        { name: 'amount', type: 'number', required: true, description: '金额（分）' },
+        { name: 'channel', type: 'string', required: true, description: '支付渠道：alipay/wechat' }
+      ], null, 2),
+      response_example_json: JSON.stringify({ code: 0, data: { pay_url: 'https://...' } }, null, 2)
+    },
+    {
+      method: 'GET', path: '/api/v1/pay/query', description: '查询支付状态',
+      request_params_json: JSON.stringify([
+        { name: 'order_id', type: 'string', required: true, description: '订单号' }
+      ], null, 2),
+      response_example_json: JSON.stringify({ code: 0, data: { status: 'paid' } }, null, 2)
+    }
+  )
 }
 
 async function sendRequest(method, url, body = null) {
@@ -233,6 +309,7 @@ async function sendRequest(method, url, body = null) {
 function doRegister() {
   const body = {}
   for (const [k, v] of Object.entries(registerForm)) { if (v) body[k] = v }
+  body.api_docs = buildApiDocs()
   sendRequest('POST', '/api/v1/services/register', body)
 }
 
@@ -283,5 +360,23 @@ function doConsumer() {
   color: #909399;
   margin-bottom: 4px;
   font-weight: 600;
+}
+.api-doc-item {
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.api-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.api-doc-idx {
+  font-size: 13px;
+  font-weight: 600;
+  color: #606266;
 }
 </style>

@@ -41,6 +41,50 @@
         </el-descriptions>
       </el-card>
 
+      <!-- 接口文档 -->
+      <el-card v-if="detail.service.api_docs && detail.service.api_docs.length" shadow="never" style="margin-bottom: 16px;">
+        <template #header>
+          <b>接口文档</b>
+          <el-tag style="margin-left:8px" size="small">{{ detail.service.api_docs.length }} 个接口</el-tag>
+        </template>
+        <el-table :data="detail.service.api_docs" stripe style="width:100%">
+          <el-table-column label="方法" width="90">
+            <template #default="{ row }">
+              <el-tag
+                :type="methodColor(row.method)"
+                size="small"
+                style="font-family:monospace;font-weight:600;"
+              >{{ row.method }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="path" label="路径" min-width="200">
+            <template #default="{ row }">
+              <code style="font-size:13px;">{{ row.path }}</code>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="说明" min-width="200" />
+          <el-table-column label="请求参数" min-width="200">
+            <template #default="{ row }">
+              <template v-if="row.request_params && row.request_params.length">
+                <div v-for="p in row.request_params" :key="p.name" style="font-size:12px;line-height:1.8;">
+                  <code>{{ p.name }}</code>
+                  <el-tag v-if="p.required" type="danger" size="small" style="margin-left:4px;transform:scale(0.8);">必填</el-tag>
+                  <span style="color:#999;margin-left:4px;">{{ p.type || '' }}</span>
+                  <span v-if="p.description" style="color:#666;"> - {{ p.description }}</span>
+                </div>
+              </template>
+              <span v-else style="color:#999">-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="响应示例" min-width="180">
+            <template #default="{ row }">
+              <pre v-if="row.response_example" style="margin:0;font-size:12px;white-space:pre-wrap;word-break:break-all;">{{ typeof row.response_example === 'string' ? row.response_example : JSON.stringify(row.response_example, null, 2) }}</pre>
+              <span v-else style="color:#999">-</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+
       <!-- 提供方 -->
       <el-card shadow="never" style="margin-bottom: 16px;">
         <template #header>
@@ -94,6 +138,11 @@ async function load() {
   } finally {
     loading.value = false
   }
+}
+
+function methodColor(m) {
+  const map = { GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger' }
+  return map[(m || '').toUpperCase()] || 'info'
 }
 
 onMounted(load)

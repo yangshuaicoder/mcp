@@ -1,6 +1,6 @@
 # MCP 服务提供方接入文档
 
-> 版本：v1.0 | 日期：2026-03-20
+> 版本：v1.1 | 日期：2026-03-23
 
 本文档面向 **微服务提供方**（拥有微服务的团队/开发者），指导如何将你的服务注册到 MCP 平台。
 
@@ -45,9 +45,22 @@
 | description | string | 否 | 服务描述 |
 | base_url | string | 是 | 服务根地址，如 `http://10.0.0.1:8080` |
 | docs_url | string | 否 | 接口文档地址 |
+| api_docs | array | **是** | 接口文档数组，详见下方格式 |
 | server_ip | string | 是 | 当前提供方服务器 IP |
 | project_name | string | 是 | 当前项目名称 |
 | contact | string | 否 | 负责人 |
+
+**api_docs 格式说明：**
+
+每个元素描述一个 API 接口，结构如下：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| method | string | 是 | HTTP 方法：GET / POST / PUT / DELETE |
+| path | string | 是 | 接口路径，如 `/api/v1/pay/create` |
+| description | string | 是 | 接口说明 |
+| request_params | array | 否 | 请求参数列表，每项含 `name`、`type`、`required`、`description` |
+| response_example | object/string | 否 | 响应示例 |
 
 **示例：**
 
@@ -61,6 +74,28 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/register \
     "description": "内部支付微服务，支持支付宝/微信支付",
     "base_url": "http://10.0.0.1:8080",
     "docs_url": "http://10.0.0.1:8080/docs",
+    "api_docs": [
+      {
+        "method": "POST",
+        "path": "/api/v1/pay/create",
+        "description": "创建支付订单",
+        "request_params": [
+          {"name": "order_id", "type": "string", "required": true, "description": "订单号"},
+          {"name": "amount", "type": "number", "required": true, "description": "金额（分）"},
+          {"name": "channel", "type": "string", "required": true, "description": "支付渠道：alipay/wechat"}
+        ],
+        "response_example": {"code": 0, "data": {"pay_url": "https://..."}}
+      },
+      {
+        "method": "GET",
+        "path": "/api/v1/pay/query",
+        "description": "查询支付状态",
+        "request_params": [
+          {"name": "order_id", "type": "string", "required": true, "description": "订单号"}
+        ],
+        "response_example": {"code": 0, "data": {"status": "paid"}}
+      }
+    ],
     "server_ip": "10.0.0.1",
     "project_name": "uni-pay",
     "contact": "张三"
@@ -147,6 +182,7 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/unregister \
 |------|------|
 | 0 | 成功 |
 | 1001 | 参数缺失（检查必填字段） |
+| 1002 | api_docs 格式错误（须为数组，每项须含 method/path/description） |
 | 1004 | 服务不存在（心跳/注销前需先注册） |
 | 5001 | 服务端保存失败 |
 
@@ -171,6 +207,18 @@ requests.post(f"{MCP_URL}/services/register", json={
     "description": "AI 图片生成微服务",
     "base_url": f"http://{SERVER_IP}:9000",
     "docs_url": f"http://{SERVER_IP}:9000/docs",
+    "api_docs": [
+        {
+            "method": "POST",
+            "path": "/api/v1/generate",
+            "description": "生成图片",
+            "request_params": [
+                {"name": "prompt", "type": "string", "required": True, "description": "图片描述"},
+                {"name": "width", "type": "int", "required": False, "description": "宽度，默认512"}
+            ],
+            "response_example": {"code": 0, "data": {"image_url": "https://..."}}
+        }
+    ],
     "server_ip": SERVER_IP,
     "project_name": "ai-image",
     "contact": "张三"
@@ -214,6 +262,16 @@ curl_setopt_array($ch, [
         'display_name' => '我的服务',
         'category'     => 'payment',
         'base_url'     => 'http://10.0.0.1:8080',
+        'api_docs'     => [
+            [
+                'method'      => 'POST',
+                'path'        => '/api/v1/pay/create',
+                'description' => '创建支付订单',
+                'request_params' => [
+                    ['name' => 'order_id', 'type' => 'string', 'required' => true, 'description' => '订单号'],
+                ],
+            ],
+        ],
         'server_ip'    => '10.0.0.1',
         'project_name' => 'uni-pay',
     ]),

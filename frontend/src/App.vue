@@ -18,6 +18,7 @@
           <el-menu-item index="/">服务总览</el-menu-item>
           <el-menu-item index="/providers">提供方列表</el-menu-item>
           <el-menu-item index="/consumers">消费方列表</el-menu-item>
+          <el-menu-item index="/test">接口测试</el-menu-item>
         </el-menu>
       </el-header>
       <el-main class="app-main">

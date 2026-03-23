@@ -92,7 +92,7 @@ class ServiceController extends BaseApiController
 
     /**
      * POST /api/v1/services/unregister
-     * 服务注销
+     * 服务注销：删除对应 provider，若无 provider 则 service 置为 offline
      */
     public function actionUnregister()
     {
@@ -109,10 +109,24 @@ class ServiceController extends BaseApiController
             return $this->error('服务不存在', 1004);
         }
 
-        $service->status = McpService::STATUS_OFFLINE;
-        $service->save(false);
+        // 删除该 server_ip 对应的 provider 记录
+        $provider = McpProvider::findOne(['service_id' => $service->id, 'server_ip' => $serverIp]);
+        if ($provider) {
+            $provider->delete();
+        }
 
-        return $this->success();
+        // 若该服务已无任何 provider，则置为 offline
+        $remainingProviders = McpProvider::find()->where(['service_id' => $service->id])->count();
+        if ($remainingProviders == 0) {
+            $service->status = McpService::STATUS_OFFLINE;
+            $service->save(false);
+        }
+
+        return $this->success([
+            'name'               => $service->name,
+            'status'             => $service->status,
+            'remaining_providers' => (int)$remainingProviders,
+        ]);
     }
 
     /**

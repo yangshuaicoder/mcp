@@ -27,8 +27,11 @@
                 <el-form-item label="文档地址" required>
                   <el-input v-model="registerForm.docs_url" placeholder="如 http://10.0.0.1:8080/docs" />
                 </el-form-item>
-                <el-form-item label="服务器 IP" required>
-                  <el-input v-model="registerForm.server_ip" placeholder="如 10.0.0.1" />
+                <el-form-item label="内网 IP" required>
+                  <el-input v-model="registerForm.internal_ip" placeholder="如 10.0.0.1" />
+                </el-form-item>
+                <el-form-item label="外网 IP" required>
+                  <el-input v-model="registerForm.external_ip" placeholder="如 43.142.159.201" />
                 </el-form-item>
                 <el-form-item label="项目名" required>
                   <el-input v-model="registerForm.project_name" placeholder="如 uni-pay" />
@@ -85,8 +88,8 @@
                 <el-form-item label="服务标识" required>
                   <el-input v-model="heartbeatForm.name" placeholder="如 payment.v1" />
                 </el-form-item>
-                <el-form-item label="服务器 IP" required>
-                  <el-input v-model="heartbeatForm.server_ip" placeholder="如 10.0.0.1" />
+                <el-form-item label="内网 IP" required>
+                  <el-input v-model="heartbeatForm.internal_ip" placeholder="如 10.0.0.1" />
                 </el-form-item>
                 <el-form-item>
                   <el-button type="success" @click="doHeartbeat" :loading="loading">发送心跳</el-button>
@@ -100,8 +103,8 @@
                 <el-form-item label="服务标识" required>
                   <el-input v-model="unregisterForm.name" placeholder="如 payment.v1" />
                 </el-form-item>
-                <el-form-item label="服务器 IP" required>
-                  <el-input v-model="unregisterForm.server_ip" placeholder="如 10.0.0.1" />
+                <el-form-item label="内网 IP" required>
+                  <el-input v-model="unregisterForm.internal_ip" placeholder="如 10.0.0.1" />
                 </el-form-item>
                 <el-form-item>
                   <el-button type="danger" @click="doUnregister" :loading="loading">发送注销请求</el-button>
@@ -222,7 +225,7 @@ const queryMode = ref('list')
 
 const registerForm = reactive({
   name: '', display_name: '', category: '', description: '',
-  base_url: '', docs_url: '', server_ip: '', project_name: '', contact: ''
+  base_url: '', docs_url: '', internal_ip: '', external_ip: '', project_name: '', contact: ''
 })
 const apiDocsList = reactive([
   { method: 'POST', path: '', description: '', request_params_json: '', response_example_json: '' }
@@ -246,8 +249,8 @@ function buildApiDocs() {
     return item
   })
 }
-const heartbeatForm = reactive({ name: '', server_ip: '' })
-const unregisterForm = reactive({ name: '', server_ip: '' })
+const heartbeatForm = reactive({ name: '', internal_ip: '' })
+const unregisterForm = reactive({ name: '', internal_ip: '' })
 const queryListForm = reactive({ category: '', keyword: '', status: 'all' })
 const queryDetailForm = reactive({ name: '' })
 const consumerForm = reactive({ service_name: '', server_ip: '', project_name: '', contact: '' })
@@ -260,7 +263,7 @@ function fillRegisterExample() {
     name: 'payment.v1', display_name: '支付服务', category: 'payment',
     description: '内部支付微服务，支持支付宝/微信支付',
     base_url: 'http://10.0.0.1:8080', docs_url: 'http://10.0.0.1:8080/docs',
-    server_ip: '10.0.0.1', project_name: 'uni-pay', contact: '张三'
+    internal_ip: '10.0.0.1', external_ip: '43.142.159.201', project_name: 'uni-pay', contact: '张三'
   })
   apiDocsList.splice(0, apiDocsList.length,
     {

@@ -21,12 +21,13 @@ class ServiceController extends BaseApiController
         $displayName = trim($body['display_name'] ?? '');
         $baseUrl     = trim($body['base_url'] ?? '');
         $docsUrl     = trim($body['docs_url'] ?? '');
-        $serverIp    = trim($body['server_ip'] ?? '');
+        $internalIp  = trim($body['internal_ip'] ?? '');
+        $externalIp  = trim($body['external_ip'] ?? '');
         $projectName = trim($body['project_name'] ?? '');
         $apiDocs     = $body['api_docs'] ?? null;
 
-        if (!$name || !$displayName || !$baseUrl || !$docsUrl || !$serverIp || !$projectName) {
-            return $this->error('name, display_name, base_url, docs_url, server_ip, project_name 为必填项', 1001);
+        if (!$name || !$displayName || !$baseUrl || !$docsUrl || !$internalIp || !$externalIp || !$projectName) {
+            return $this->error('name, display_name, base_url, docs_url, internal_ip, external_ip, project_name 为必填项', 1001);
         }
 
         // api_docs 必填，且必须是数组
@@ -61,13 +62,14 @@ class ServiceController extends BaseApiController
             return $this->error('保存失败: ' . json_encode($service->errors), 5001);
         }
 
-        // Upsert provider
-        $provider = McpProvider::findOne(['service_id' => $service->id, 'server_ip' => $serverIp]);
+        // Upsert provider（以 internal_ip 为唯一标识）
+        $provider = McpProvider::findOne(['service_id' => $service->id, 'internal_ip' => $internalIp]);
         if (!$provider) {
             $provider = new McpProvider();
-            $provider->service_id = $service->id;
-            $provider->server_ip  = $serverIp;
+            $provider->service_id  = $service->id;
+            $provider->internal_ip = $internalIp;
         }
+        $provider->external_ip  = $externalIp;
         $provider->project_name = $projectName;
         $provider->contact      = trim($body['contact'] ?? '') ?: null;
         $provider->save(false);
@@ -85,12 +87,12 @@ class ServiceController extends BaseApiController
      */
     public function actionHeartbeat()
     {
-        $body     = $this->getJsonBody();
-        $name     = trim($body['name'] ?? '');
-        $serverIp = trim($body['server_ip'] ?? '');
+        $body       = $this->getJsonBody();
+        $name       = trim($body['name'] ?? '');
+        $internalIp = trim($body['internal_ip'] ?? '');
 
-        if (!$name || !$serverIp) {
-            return $this->error('name, server_ip 为必填项', 1001);
+        if (!$name || !$internalIp) {
+            return $this->error('name, internal_ip 为必填项', 1001);
         }
 
         $service = McpService::findOne(['name' => $name]);
@@ -111,12 +113,12 @@ class ServiceController extends BaseApiController
      */
     public function actionUnregister()
     {
-        $body     = $this->getJsonBody();
-        $name     = trim($body['name'] ?? '');
-        $serverIp = trim($body['server_ip'] ?? '');
+        $body       = $this->getJsonBody();
+        $name       = trim($body['name'] ?? '');
+        $internalIp = trim($body['internal_ip'] ?? '');
 
-        if (!$name || !$serverIp) {
-            return $this->error('name, server_ip 为必填项', 1001);
+        if (!$name || !$internalIp) {
+            return $this->error('name, internal_ip 为必填项', 1001);
         }
 
         $service = McpService::findOne(['name' => $name]);
@@ -124,8 +126,8 @@ class ServiceController extends BaseApiController
             return $this->error('服务不存在', 1004);
         }
 
-        // 删除该 server_ip 对应的 provider 记录
-        $provider = McpProvider::findOne(['service_id' => $service->id, 'server_ip' => $serverIp]);
+        // 删除该 internal_ip 对应的 provider 记录
+        $provider = McpProvider::findOne(['service_id' => $service->id, 'internal_ip' => $internalIp]);
         if ($provider) {
             $provider->delete();
         }

@@ -16,8 +16,9 @@
         @input="onSearch"
       />
       <el-table :data="filtered" v-loading="loading" stripe>
-        <el-table-column prop="server_ip"    label="服务器 IP"  width="160" />
-        <el-table-column prop="project_name" label="项目名"     min-width="160" />
+        <el-table-column prop="internal_ip"  label="内网 IP"  width="160" />
+        <el-table-column prop="external_ip"  label="外网 IP"  width="160" />
+        <el-table-column prop="project_name" label="项目名"   min-width="160" />
         <el-table-column label="提供的服务" min-width="260">
           <template #default="{ row }">
             <el-tag
@@ -54,7 +55,8 @@ const filtered = computed(() => {
   if (!keyword.value) return rows.value
   const k = keyword.value.toLowerCase()
   return rows.value.filter(r =>
-    r.server_ip.toLowerCase().includes(k) ||
+    r.internal_ip.toLowerCase().includes(k) ||
+    r.external_ip.toLowerCase().includes(k) ||
     r.project_name.toLowerCase().includes(k)
   )
 })
@@ -76,9 +78,9 @@ async function load() {
       const provRes = await axios.get(`/api/v1/services/${svc.name}`)
       const providers = provRes.data.data?.providers || []
       for (const p of providers) {
-        const key = `${p.server_ip}|${p.project_name}`
+        const key = `${p.internal_ip}|${p.project_name}`
         if (!map[key]) {
-          map[key] = { server_ip: p.server_ip, project_name: p.project_name, contact: p.contact, services: [] }
+          map[key] = { internal_ip: p.internal_ip, external_ip: p.external_ip, project_name: p.project_name, contact: p.contact, services: [] }
         }
         map[key].services.push({ name: svc.name, display_name: svc.display_name, status: svc.status })
       }

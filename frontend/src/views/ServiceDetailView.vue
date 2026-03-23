@@ -92,7 +92,8 @@
           <el-tag style="margin-left:8px" size="small">{{ detail.providers.length }}</el-tag>
         </template>
         <el-table :data="detail.providers" stripe>
-          <el-table-column prop="server_ip"    label="服务器 IP"  width="160" />
+          <el-table-column prop="internal_ip"  label="内网 IP"    width="160" />
+          <el-table-column prop="external_ip"  label="外网 IP"    width="160" />
           <el-table-column prop="project_name" label="项目名"     min-width="160" />
           <el-table-column prop="contact"      label="负责人"     width="120">
             <template #default="{ row }">{{ row.contact || '-' }}</template>

@@ -1,6 +1,6 @@
 # MCP 服务提供方接入文档
 
-> 版本：v1.1 | 日期：2026-03-23
+> 版本：v1.2 | 日期：2026-03-23
 
 本文档面向 **微服务提供方**（拥有微服务的团队/开发者），指导如何将你的服务注册到 MCP 平台。
 
@@ -46,7 +46,8 @@
 | base_url | string | 是 | 服务根地址，如 `http://10.0.0.1:8080` |
 | docs_url | string | 是 | 接口文档地址 |
 | api_docs | array | **是** | 接口文档数组，详见下方格式 |
-| server_ip | string | 是 | 当前提供方服务器 IP |
+| internal_ip | string | 是 | 提供方内网 IP |
+| external_ip | string | 是 | 提供方外网 IP |
 | project_name | string | 是 | 当前项目名称 |
 | contact | string | 否 | 负责人 |
 
@@ -96,7 +97,8 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/register \
         "response_example": {"code": 0, "data": {"status": "paid"}}
       }
     ],
-    "server_ip": "10.0.0.1",
+    "internal_ip": "10.0.0.1",
+    "external_ip": "43.142.159.201",
     "project_name": "uni-pay",
     "contact": "张三"
   }'
@@ -125,14 +127,14 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/register \
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | name | string | 是 | 服务唯一标识 |
-| server_ip | string | 是 | 提供方服务器 IP |
+| internal_ip | string | 是 | 提供方内网 IP |
 
 **示例：**
 
 ```bash
 curl -X POST http://10.20.240.84:8083/api/v1/services/heartbeat \
   -H "Content-Type: application/json" \
-  -d '{"name": "payment.v1", "server_ip": "10.0.0.1"}'
+  -d '{"name": "payment.v1", "internal_ip": "10.0.0.1"}'
 ```
 
 **响应：**
@@ -147,21 +149,21 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/heartbeat \
 
 **POST** `/api/v1/services/unregister`
 
-服务关闭时调用。会删除该 IP 的提供方记录；若该服务已无任何提供方，状态自动变为 offline。
+服务关闭时调用。会删除该内网 IP 的提供方记录；若该服务已无任何提供方，状态自动变为 offline。
 
 **Request Body:**
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | name | string | 是 | 服务唯一标识 |
-| server_ip | string | 是 | 提供方服务器 IP |
+| internal_ip | string | 是 | 提供方内网 IP |
 
 **示例：**
 
 ```bash
 curl -X POST http://10.20.240.84:8083/api/v1/services/unregister \
   -H "Content-Type: application/json" \
-  -d '{"name": "payment.v1", "server_ip": "10.0.0.1"}'
+  -d '{"name": "payment.v1", "internal_ip": "10.0.0.1"}'
 ```
 
 **响应：**
@@ -197,7 +199,8 @@ import requests, time, threading, atexit
 
 MCP_URL = "http://10.20.240.84:8083/api/v1"  # 内网地址
 SERVICE_NAME = "my-service.v1"
-SERVER_IP = "10.0.0.3"
+INTERNAL_IP = "10.0.0.3"
+EXTERNAL_IP = "43.142.159.201"
 
 # === 1. 启动时注册 ===
 requests.post(f"{MCP_URL}/services/register", json={
@@ -205,8 +208,8 @@ requests.post(f"{MCP_URL}/services/register", json={
     "display_name": "我的服务",
     "category": "ai",
     "description": "AI 图片生成微服务",
-    "base_url": f"http://{SERVER_IP}:9000",
-    "docs_url": f"http://{SERVER_IP}:9000/docs",
+    "base_url": f"http://{INTERNAL_IP}:9000",
+    "docs_url": f"http://{INTERNAL_IP}:9000/docs",
     "api_docs": [
         {
             "method": "POST",
@@ -219,7 +222,8 @@ requests.post(f"{MCP_URL}/services/register", json={
             "response_example": {"code": 0, "data": {"image_url": "https://..."}}
         }
     ],
-    "server_ip": SERVER_IP,
+    "internal_ip": INTERNAL_IP,
+    "external_ip": EXTERNAL_IP,
     "project_name": "ai-image",
     "contact": "张三"
 })
@@ -230,7 +234,7 @@ def heartbeat_loop():
     while not _stop:
         try:
             requests.post(f"{MCP_URL}/services/heartbeat", json={
-                "name": SERVICE_NAME, "server_ip": SERVER_IP
+                "name": SERVICE_NAME, "internal_ip": INTERNAL_IP
             }, timeout=5)
         except:
             pass
@@ -243,7 +247,7 @@ def on_exit():
     global _stop
     _stop = True
     requests.post(f"{MCP_URL}/services/unregister", json={
-        "name": SERVICE_NAME, "server_ip": SERVER_IP
+        "name": SERVICE_NAME, "internal_ip": INTERNAL_IP
     })
 
 atexit.register(on_exit)
@@ -272,7 +276,8 @@ curl_setopt_array($ch, [
                 ],
             ],
         ],
-        'server_ip'    => '10.0.0.1',
+        'internal_ip'  => '10.0.0.1',
+        'external_ip'  => '43.142.159.201',
         'project_name' => 'uni-pay',
     ]),
     CURLOPT_RETURNTRANSFER => true,
@@ -283,13 +288,13 @@ curl_close($ch);
 // 心跳（crontab 每 30 秒执行一次）
 // * * * * * curl -s -X POST http://10.20.240.84:8083/api/v1/services/heartbeat \
 //   -H "Content-Type: application/json" \
-//   -d '{"name":"my-service.v1","server_ip":"10.0.0.1"}'
+//   -d '{"name":"my-service.v1","internal_ip":"10.0.0.1"}'
 ```
 
 ### Shell (crontab 心跳)
 
 ```bash
 # 每分钟发送两次心跳（间隔 30 秒）
-* * * * * curl -s -X POST http://10.20.240.84:8083/api/v1/services/heartbeat -H "Content-Type: application/json" -d '{"name":"my-service.v1","server_ip":"10.0.0.1"}'
-* * * * * sleep 30 && curl -s -X POST http://10.20.240.84:8083/api/v1/services/heartbeat -H "Content-Type: application/json" -d '{"name":"my-service.v1","server_ip":"10.0.0.1"}'
+* * * * * curl -s -X POST http://10.20.240.84:8083/api/v1/services/heartbeat -H "Content-Type: application/json" -d '{"name":"my-service.v1","internal_ip":"10.0.0.1"}'
+* * * * * sleep 30 && curl -s -X POST http://10.20.240.84:8083/api/v1/services/heartbeat -H "Content-Type: application/json" -d '{"name":"my-service.v1","internal_ip":"10.0.0.1"}'
 ```

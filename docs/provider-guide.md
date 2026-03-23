@@ -44,7 +44,7 @@
 | category | string | 否 | 服务分类（自由填写），默认 `other` |
 | description | string | 否 | 服务描述 |
 | base_url | string | 是 | 服务根地址，如 `http://10.0.0.1:8080` |
-| docs_url | string | 否 | 接口文档地址 |
+| docs_url | string | 是 | 接口文档地址 |
 | api_docs | array | **是** | 接口文档数组，详见下方格式 |
 | server_ip | string | 是 | 当前提供方服务器 IP |
 | project_name | string | 是 | 当前项目名称 |

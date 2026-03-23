@@ -20,12 +20,13 @@ class ServiceController extends BaseApiController
         $name        = trim($body['name'] ?? '');
         $displayName = trim($body['display_name'] ?? '');
         $baseUrl     = trim($body['base_url'] ?? '');
+        $docsUrl     = trim($body['docs_url'] ?? '');
         $serverIp    = trim($body['server_ip'] ?? '');
         $projectName = trim($body['project_name'] ?? '');
         $apiDocs     = $body['api_docs'] ?? null;
 
-        if (!$name || !$displayName || !$baseUrl || !$serverIp || !$projectName) {
-            return $this->error('name, display_name, base_url, server_ip, project_name 为必填项', 1001);
+        if (!$name || !$displayName || !$baseUrl || !$docsUrl || !$serverIp || !$projectName) {
+            return $this->error('name, display_name, base_url, docs_url, server_ip, project_name 为必填项', 1001);
         }
 
         // api_docs 必填，且必须是数组

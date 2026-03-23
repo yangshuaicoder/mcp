@@ -24,8 +24,8 @@
                 <el-form-item label="服务地址" required>
                   <el-input v-model="registerForm.base_url" placeholder="如 http://10.0.0.1:8080" />
                 </el-form-item>
-                <el-form-item label="文档地址">
-                  <el-input v-model="registerForm.docs_url" />
+                <el-form-item label="文档地址" required>
+                  <el-input v-model="registerForm.docs_url" placeholder="如 http://10.0.0.1:8080/docs" />
                 </el-form-item>
                 <el-form-item label="服务器 IP" required>
                   <el-input v-model="registerForm.server_ip" placeholder="如 10.0.0.1" />

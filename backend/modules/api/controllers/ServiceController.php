@@ -19,15 +19,16 @@ class ServiceController extends BaseApiController
 
         $name        = trim($body['name'] ?? '');
         $displayName = trim($body['display_name'] ?? '');
-        $baseUrl     = trim($body['base_url'] ?? '');
+        $internalUrl = trim($body['internal_url'] ?? '');
+        $externalUrl = trim($body['external_url'] ?? '');
         $docsUrl     = trim($body['docs_url'] ?? '');
         $internalIp  = trim($body['internal_ip'] ?? '');
         $externalIp  = trim($body['external_ip'] ?? '');
         $projectName = trim($body['project_name'] ?? '');
         $apiDocs     = $body['api_docs'] ?? null;
 
-        if (!$name || !$displayName || !$baseUrl || !$docsUrl || !$internalIp || !$externalIp || !$projectName) {
-            return $this->error('name, display_name, base_url, docs_url, internal_ip, external_ip, project_name 为必填项', 1001);
+        if (!$name || !$displayName || !$internalUrl || !$externalUrl || !$docsUrl || !$internalIp || !$externalIp || !$projectName) {
+            return $this->error('name, display_name, internal_url, external_url, docs_url, internal_ip, external_ip, project_name 为必填项', 1001);
         }
 
         // api_docs 必填，且必须是数组
@@ -52,7 +53,8 @@ class ServiceController extends BaseApiController
         $service->display_name      = $displayName;
         $service->category          = trim($body['category'] ?? 'other') ?: 'other';
         $service->description       = trim($body['description'] ?? '') ?: null;
-        $service->base_url          = $baseUrl;
+        $service->internal_url      = $internalUrl;
+        $service->external_url      = $externalUrl;
         $service->docs_url          = trim($body['docs_url'] ?? '') ?: null;
         $service->api_docs          = json_encode($apiDocs, JSON_UNESCAPED_UNICODE);
         $service->status            = McpService::STATUS_ONLINE;

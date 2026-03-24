@@ -1,6 +1,6 @@
 # MCP 服务提供方接入文档
 
-> 版本：v1.2 | 日期：2026-03-23
+> 版本：v1.3 | 日期：2026-03-24
 
 本文档面向 **微服务提供方**（拥有微服务的团队/开发者），指导如何将你的服务注册到 MCP 平台。
 
@@ -43,13 +43,18 @@
 | display_name | string | 是 | 展示名称，如 `支付服务` |
 | category | string | 否 | 服务分类（自由填写），默认 `other` |
 | description | string | 否 | 服务描述 |
-| base_url | string | 是 | 服务根地址，如 `http://10.0.0.1:8080` |
+| internal_url | string | 是 | **内网访问地址**，如 `http://10.0.0.1:8080`，供同网络服务调用（正式环境） |
+| external_url | string | 是 | **外网访问地址**，如 `http://43.142.159.201:8080`，供测试或跨云调用 |
 | docs_url | string | 是 | 接口文档地址 |
 | api_docs | array | **是** | 接口文档数组，详见下方格式 |
-| internal_ip | string | 是 | 提供方内网 IP |
+| internal_ip | string | 是 | 提供方内网 IP（用于心跳/注销标识） |
 | external_ip | string | 是 | 提供方外网 IP |
 | project_name | string | 是 | 当前项目名称 |
 | contact | string | 否 | 负责人 |
+
+> **地址说明：**
+> - `internal_url` — 内网地址，消费方在同一内网时优先使用，延迟低、不走公网流量
+> - `external_url` — 外网地址，用于跨云访问、联调测试、或消费方不在同一内网时使用
 
 **api_docs 格式说明：**
 
@@ -73,7 +78,8 @@ curl -X POST http://10.20.240.84:8083/api/v1/services/register \
     "display_name": "支付服务",
     "category": "payment",
     "description": "内部支付微服务，支持支付宝/微信支付",
-    "base_url": "http://10.0.0.1:8080",
+    "internal_url": "http://10.0.0.1:8080",
+    "external_url": "http://43.142.159.201:8080",
     "docs_url": "http://10.0.0.1:8080/docs",
     "api_docs": [
       {
@@ -208,7 +214,8 @@ requests.post(f"{MCP_URL}/services/register", json={
     "display_name": "我的服务",
     "category": "ai",
     "description": "AI 图片生成微服务",
-    "base_url": f"http://{INTERNAL_IP}:9000",
+    "internal_url": f"http://{INTERNAL_IP}:9000",
+    "external_url": f"http://{EXTERNAL_IP}:9000",
     "docs_url": f"http://{INTERNAL_IP}:9000/docs",
     "api_docs": [
         {
@@ -265,7 +272,9 @@ curl_setopt_array($ch, [
         'name'         => 'my-service.v1',
         'display_name' => '我的服务',
         'category'     => 'payment',
-        'base_url'     => 'http://10.0.0.1:8080',
+        'internal_url' => 'http://10.0.0.1:8080',
+        'external_url' => 'http://43.142.159.201:8080',
+        'docs_url'     => 'http://10.0.0.1:8080/docs',
         'api_docs'     => [
             [
                 'method'      => 'POST',

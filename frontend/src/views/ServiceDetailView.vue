@@ -28,8 +28,11 @@
             <el-badge :type="detail.service.status === 'online' ? 'success' : 'danger'" is-dot style="margin-right:6px" />
             {{ detail.service.status === 'online' ? '在线' : '离线' }}
           </el-descriptions-item>
-          <el-descriptions-item label="服务地址" :span="2">
-            <a :href="detail.service.base_url" target="_blank">{{ detail.service.base_url }}</a>
+          <el-descriptions-item label="内网地址" :span="2">
+            <a :href="detail.service.internal_url" target="_blank">{{ detail.service.internal_url }}</a>
+          </el-descriptions-item>
+          <el-descriptions-item label="外网地址" :span="2">
+            <a :href="detail.service.external_url" target="_blank">{{ detail.service.external_url }}</a>
           </el-descriptions-item>
           <el-descriptions-item label="文档地址" :span="2">
             <a v-if="detail.service.docs_url" :href="detail.service.docs_url" target="_blank">{{ detail.service.docs_url }}</a>

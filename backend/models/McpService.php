@@ -10,7 +10,8 @@ use yii\db\ActiveRecord;
  * @property string $display_name
  * @property string $category
  * @property string|null $description
- * @property string $base_url
+ * @property string $internal_url  内网访问地址
+ * @property string $external_url  外网访问地址
  * @property string|null $docs_url
  * @property array|null $api_docs  接口文档 JSON
  * @property string $status  online|offline
@@ -31,11 +32,11 @@ class McpService extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'display_name', 'base_url'], 'required'],
+            [['name', 'display_name', 'internal_url', 'external_url'], 'required'],
             [['name'], 'string', 'max' => 100],
             [['display_name'], 'string', 'max' => 200],
             [['category'], 'string', 'max' => 50],
-            [['base_url', 'docs_url'], 'string', 'max' => 500],
+            [['internal_url', 'external_url', 'docs_url'], 'string', 'max' => 500],
             [['description'], 'string'],
             [['api_docs'], 'safe'],
             [['status'], 'in', 'range' => [self::STATUS_ONLINE, self::STATUS_OFFLINE]],
@@ -60,7 +61,8 @@ class McpService extends ActiveRecord
             'display_name'     => $this->display_name,
             'category'         => $this->category,
             'description'      => $this->description,
-            'base_url'         => $this->base_url,
+            'internal_url'     => $this->internal_url,
+            'external_url'     => $this->external_url,
             'docs_url'         => $this->docs_url,
             'api_docs'         => is_string($this->api_docs) ? json_decode($this->api_docs, true) : $this->api_docs,
             'status'           => $this->status,

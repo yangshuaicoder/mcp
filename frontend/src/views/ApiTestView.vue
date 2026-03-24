@@ -21,8 +21,11 @@
                 <el-form-item label="描述">
                   <el-input v-model="registerForm.description" type="textarea" :rows="2" />
                 </el-form-item>
-                <el-form-item label="服务地址" required>
-                  <el-input v-model="registerForm.base_url" placeholder="如 http://10.0.0.1:8080" />
+                <el-form-item label="内网地址" required>
+                  <el-input v-model="registerForm.internal_url" placeholder="如 http://10.0.0.1:8080（内网，正式环境调用）" />
+                </el-form-item>
+                <el-form-item label="外网地址" required>
+                  <el-input v-model="registerForm.external_url" placeholder="如 http://43.142.159.201:8080（外网，测试/跨云调用）" />
                 </el-form-item>
                 <el-form-item label="文档地址" required>
                   <el-input v-model="registerForm.docs_url" placeholder="如 http://10.0.0.1:8080/docs" />
@@ -225,7 +228,7 @@ const queryMode = ref('list')
 
 const registerForm = reactive({
   name: '', display_name: '', category: '', description: '',
-  base_url: '', docs_url: '', internal_ip: '', external_ip: '', project_name: '', contact: ''
+  internal_url: '', external_url: '', docs_url: '', internal_ip: '', external_ip: '', project_name: '', contact: ''
 })
 const apiDocsList = reactive([
   { method: 'POST', path: '', description: '', request_params_json: '', response_example_json: '' }
@@ -262,7 +265,8 @@ function fillRegisterExample() {
   Object.assign(registerForm, {
     name: 'payment.v1', display_name: '支付服务', category: 'payment',
     description: '内部支付微服务，支持支付宝/微信支付',
-    base_url: 'http://10.0.0.1:8080', docs_url: 'http://10.0.0.1:8080/docs',
+    internal_url: 'http://10.0.0.1:8080', external_url: 'http://43.142.159.201:8080',
+    docs_url: 'http://10.0.0.1:8080/docs',
     internal_ip: '10.0.0.1', external_ip: '43.142.159.201', project_name: 'uni-pay', contact: '张三'
   })
   apiDocsList.splice(0, apiDocsList.length,

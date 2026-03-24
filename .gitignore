@@ -12,3 +12,9 @@ frontend/dist/
 .idea/
 .vscode/
 *.swp
+
+# Local overrides (not for version control)
+backend/config/local.php
+backend/config/*.local.php
+.env
+.env.local

@@ -13,7 +13,6 @@
         clearable
         :prefix-icon="Search"
         style="max-width:300px; margin-bottom:16px;"
-        @input="onSearch"
       />
       <el-table :data="filtered" v-loading="loading" stripe>
         <el-table-column prop="internal_ip"  label="内网 IP"  width="160" />
@@ -45,7 +44,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
-import axios from 'axios'
+import { api } from '../api/index.js'
 
 const loading = ref(false)
 const rows = ref([])
@@ -61,22 +60,17 @@ const filtered = computed(() => {
   )
 })
 
-let searchTimer = null
-function onSearch() {
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {}, 300)
-}
-
 async function load() {
   loading.value = true
   try {
-    const res = await axios.get('/api/v1/services', { params: { status: 'all', page_size: 100 } })
-    const services = res.data.data?.list || []
+    const data = await api.getServices({ status: 'all', page_size: 100 })
+    const services = data.list || []
+
+    const details = await Promise.all(services.map(svc => api.getServiceDetail(svc.name)))
 
     const map = {}
-    for (const svc of services) {
-      const provRes = await axios.get(`/api/v1/services/${svc.name}`)
-      const providers = provRes.data.data?.providers || []
+    services.forEach((svc, i) => {
+      const providers = details[i]?.providers || []
       for (const p of providers) {
         const key = `${p.internal_ip}|${p.project_name}`
         if (!map[key]) {
@@ -84,8 +78,10 @@ async function load() {
         }
         map[key].services.push({ name: svc.name, display_name: svc.display_name, status: svc.status })
       }
-    }
+    })
     rows.value = Object.values(map)
+  } catch (e) {
+    // 错误由 api 拦截器统一处理
   } finally {
     loading.value = false
   }

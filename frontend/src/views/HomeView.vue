@@ -80,7 +80,7 @@
             <span>{{ row.status === 'online' ? '在线' : '离线' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="base_url" label="服务地址" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="internal_url" label="内网地址" min-width="200" show-overflow-tooltip />
         <el-table-column prop="last_heartbeat_at" label="最后心跳" width="160" />
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="{ row }">

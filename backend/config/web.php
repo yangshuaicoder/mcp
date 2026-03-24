@@ -30,9 +30,9 @@ $config = [
                     $data = $response->data;
                     if ($response->statusCode >= 400 && !isset($data['code'])) {
                         $response->data = [
-                            'code' => $response->statusCode,
+                            'code'    => 1,
                             'message' => isset($data['message']) ? $data['message'] : 'Error',
-                            'data' => null,
+                            'data'    => null,
                         ];
                         $response->statusCode = 200;
                     }

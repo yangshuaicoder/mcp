@@ -4,9 +4,10 @@ $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 return [
-    'id' => 'mcp-console',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'id'         => 'mcp-console',
+    'basePath'   => dirname(__DIR__),
+    'timeZone'   => 'Asia/Shanghai',
+    'bootstrap'  => ['log'],
     'controllerNamespace' => 'app\commands',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

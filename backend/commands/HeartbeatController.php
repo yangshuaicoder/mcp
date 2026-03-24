@@ -9,7 +9,7 @@ use app\models\McpService;
 /**
  * 心跳超时检测命令
  * 用法：php yii heartbeat/check
- * crontab：* * * * * cd /var/www/mcp/backend && php yii heartbeat/check >> /var/log/mcp-heartbeat.log 2>&1
+ * crontab：* * * * * cd /data/apps/mcp/current/backend && php yii heartbeat/check >> /data/logs/cron/mcp_heartbeat_check.log 2>&1
  */
 class HeartbeatController extends Controller
 {
@@ -22,6 +22,7 @@ class HeartbeatController extends Controller
             ['status' => McpService::STATUS_OFFLINE],
             ['and',
                 ['status' => McpService::STATUS_ONLINE],
+                ['not', ['last_heartbeat_at' => null]],
                 ['<', 'last_heartbeat_at', $deadline],
             ]
         );

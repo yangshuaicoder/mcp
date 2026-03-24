@@ -265,9 +265,9 @@ function fillRegisterExample() {
   Object.assign(registerForm, {
     name: 'payment.v1', display_name: '支付服务', category: 'payment',
     description: '内部支付微服务，支持支付宝/微信支付',
-    internal_url: 'http://10.0.0.1:8080', external_url: 'http://43.142.159.201:8080',
+    internal_url: 'http://10.0.0.1:8080', external_url: 'http://1.2.3.4:8080',
     docs_url: 'http://10.0.0.1:8080/docs',
-    internal_ip: '10.0.0.1', external_ip: '43.142.159.201', project_name: 'uni-pay', contact: '张三'
+    internal_ip: '10.0.0.1', external_ip: '1.2.3.4', project_name: 'uni-pay', contact: '张三'
   })
   apiDocsList.splice(0, apiDocsList.length,
     {

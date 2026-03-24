@@ -43,7 +43,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
-import axios from 'axios'
+import { api } from '../api/index.js'
 
 const loading = ref(false)
 const rows = ref([])
@@ -61,13 +61,14 @@ const filtered = computed(() => {
 async function load() {
   loading.value = true
   try {
-    const res = await axios.get('/api/v1/services', { params: { status: 'all', page_size: 100 } })
-    const services = res.data.data?.list || []
+    const data = await api.getServices({ status: 'all', page_size: 100 })
+    const services = data.list || []
+
+    const details = await Promise.all(services.map(svc => api.getServiceDetail(svc.name)))
 
     const map = {}
-    for (const svc of services) {
-      const detailRes = await axios.get(`/api/v1/services/${svc.name}`)
-      const consumers = detailRes.data.data?.consumers || []
+    services.forEach((svc, i) => {
+      const consumers = details[i]?.consumers || []
       for (const c of consumers) {
         const key = `${c.server_ip}|${c.project_name}`
         if (!map[key]) {
@@ -75,8 +76,10 @@ async function load() {
         }
         map[key].services.push({ name: svc.name, display_name: svc.display_name, status: svc.status })
       }
-    }
+    })
     rows.value = Object.values(map)
+  } catch (e) {
+    // 错误由 api 拦截器统一处理
   } finally {
     loading.value = false
   }

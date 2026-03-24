@@ -74,7 +74,9 @@ class ServiceController extends BaseApiController
         $provider->external_ip  = $externalIp;
         $provider->project_name = $projectName;
         $provider->contact      = trim($body['contact'] ?? '') ?: null;
-        $provider->save(false);
+        if (!$provider->save(false)) {
+            \Yii::warning('Provider save failed for service ' . $service->name . ': ' . json_encode($provider->errors), 'mcp');
+        }
 
         return $this->success([
             'id'     => $service->id,

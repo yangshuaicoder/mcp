@@ -28,13 +28,13 @@ $config = [
                 $response = $event->sender;
                 if ($response->format === yii\web\Response::FORMAT_JSON) {
                     $data = $response->data;
+                    // 将 Yii 框架级别的错误（如路由未匹配）包装为统一格式
                     if ($response->statusCode >= 400 && !isset($data['code'])) {
                         $response->data = [
                             'code'    => 1,
                             'message' => isset($data['message']) ? $data['message'] : 'Error',
                             'data'    => null,
                         ];
-                        $response->statusCode = 200;
                     }
                 }
             },
@@ -87,12 +87,12 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
-        'allowedIPs' => ['*'],
+        'allowedIPs' => ['127.0.0.1', '::1'],
     ];
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        'allowedIPs' => ['*'],
+        'allowedIPs' => ['127.0.0.1', '::1'],
     ];
 }
 

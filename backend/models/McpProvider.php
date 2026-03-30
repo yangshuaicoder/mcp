@@ -20,6 +20,18 @@ class McpProvider extends ActiveRecord
         return 'mcp_providers';
     }
 
+    public function rules()
+    {
+        return [
+            [['service_id', 'internal_ip', 'external_ip', 'project_name'], 'required'],
+            [['service_id'], 'integer'],
+            [['internal_ip', 'external_ip'], 'string', 'max' => 100],
+            [['project_name'], 'string', 'max' => 200],
+            [['contact'], 'string', 'max' => 200],
+            [['contact'], 'default', 'value' => null],
+        ];
+    }
+
     public function getService()
     {
         return $this->hasOne(McpService::class, ['id' => 'service_id']);

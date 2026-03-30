@@ -30,6 +30,7 @@
 
 <script setup>
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import { Grid } from '@element-plus/icons-vue'
 </script>
 
 <style>

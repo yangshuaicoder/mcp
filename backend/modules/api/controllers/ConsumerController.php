@@ -42,7 +42,7 @@ class ConsumerController extends BaseApiController
         }
 
         $consumer->contact = trim($body['contact'] ?? '') ?: null;
-        if (!$consumer->save(false)) {
+        if (!$consumer->save()) {
             return $this->error('消费方登记失败: ' . json_encode($consumer->errors), 5001);
         }
 

@@ -36,10 +36,18 @@ class BaseApiController extends Controller
 
     protected function error($message = 'error', $code = 1, $data = null)
     {
+        if ($code === 1004) {
+            \Yii::$app->response->statusCode = 404;
+        } elseif ($code >= 5000) {
+            \Yii::$app->response->statusCode = 500;
+        } else {
+            \Yii::$app->response->statusCode = 400;
+        }
+
         return [
-            'code' => $code,
+            'code'    => $code,
             'message' => $message,
-            'data' => $data,
+            'data'    => $data,
         ];
     }
 

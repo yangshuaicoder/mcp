@@ -313,36 +313,36 @@ async function sendRequest(method, url, body = null) {
   }
 }
 
-function doRegister() {
+async function doRegister() {
   const body = {}
   for (const [k, v] of Object.entries(registerForm)) { if (v) body[k] = v }
   body.api_docs = buildApiDocs()
-  sendRequest('POST', '/api/v1/services/register', body)
+  await sendRequest('POST', '/api/v1/services/register', body)
 }
 
-function doHeartbeat() {
-  sendRequest('POST', '/api/v1/services/heartbeat', { ...heartbeatForm })
+async function doHeartbeat() {
+  await sendRequest('POST', '/api/v1/services/heartbeat', { ...heartbeatForm })
 }
 
-function doUnregister() {
-  sendRequest('POST', '/api/v1/services/unregister', { ...unregisterForm })
+async function doUnregister() {
+  await sendRequest('POST', '/api/v1/services/unregister', { ...unregisterForm })
 }
 
-function doQuery() {
+async function doQuery() {
   if (queryMode.value === 'detail') {
-    sendRequest('GET', `/api/v1/services/${queryDetailForm.name}`)
+    await sendRequest('GET', `/api/v1/services/${queryDetailForm.name}`)
   } else {
     const params = new URLSearchParams()
     if (queryListForm.category) params.set('category', queryListForm.category)
     if (queryListForm.keyword) params.set('keyword', queryListForm.keyword)
     if (queryListForm.status) params.set('status', queryListForm.status)
     const qs = params.toString()
-    sendRequest('GET', `/api/v1/services${qs ? '?' + qs : ''}`)
+    await sendRequest('GET', `/api/v1/services${qs ? '?' + qs : ''}`)
   }
 }
 
-function doConsumer() {
-  sendRequest('POST', '/api/v1/consumers/register', { ...consumerForm })
+async function doConsumer() {
+  await sendRequest('POST', '/api/v1/consumers/register', { ...consumerForm })
 }
 </script>
 

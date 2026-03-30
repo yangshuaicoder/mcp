@@ -55,7 +55,7 @@ class ServiceController extends BaseApiController
         $service->description       = trim($body['description'] ?? '') ?: null;
         $service->internal_url      = $internalUrl;
         $service->external_url      = $externalUrl;
-        $service->docs_url          = trim($body['docs_url'] ?? '') ?: null;
+        $service->docs_url          = $docsUrl;
         $service->api_docs          = json_encode($apiDocs, JSON_UNESCAPED_UNICODE);
         $service->status            = McpService::STATUS_ONLINE;
         $service->last_heartbeat_at = date('Y-m-d H:i:s');
@@ -74,8 +74,8 @@ class ServiceController extends BaseApiController
         $provider->external_ip  = $externalIp;
         $provider->project_name = $projectName;
         $provider->contact      = trim($body['contact'] ?? '') ?: null;
-        if (!$provider->save(false)) {
-            \Yii::warning('Provider save failed for service ' . $service->name . ': ' . json_encode($provider->errors), 'mcp');
+        if (!$provider->save()) {
+            return $this->error('节点信息保存失败: ' . json_encode($provider->errors), 5001);
         }
 
         return $this->success([
@@ -132,9 +132,10 @@ class ServiceController extends BaseApiController
 
         // 删除该 internal_ip 对应的 provider 记录
         $provider = McpProvider::findOne(['service_id' => $service->id, 'internal_ip' => $internalIp]);
-        if ($provider) {
-            $provider->delete();
+        if (!$provider) {
+            return $this->error('该节点未注册', 1004);
         }
+        $provider->delete();
 
         // 若该服务已无任何 provider，则置为 offline
         $remainingProviders = McpProvider::find()->where(['service_id' => $service->id])->count();
@@ -181,7 +182,7 @@ class ServiceController extends BaseApiController
 
         $total = $query->count();
         $services = $query
-            ->orderBy(['status' => SORT_DESC, 'updated_at' => SORT_DESC])
+            ->orderBy(new \yii\db\Expression("FIELD(status, 'online', 'offline'), updated_at DESC"))
             ->offset(($page - 1) * $pageSize)
             ->limit($pageSize)
             ->all();

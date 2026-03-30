@@ -40,6 +40,8 @@ class McpService extends ActiveRecord
             [['description'], 'string'],
             [['api_docs'], 'safe'],
             [['status'], 'in', 'range' => [self::STATUS_ONLINE, self::STATUS_OFFLINE]],
+            [['last_heartbeat_at'], 'date', 'format' => 'php:Y-m-d H:i:s'],
+            [['last_heartbeat_at'], 'default', 'value' => null],
         ];
     }
 

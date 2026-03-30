@@ -107,7 +107,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
-import { api } from '../api/index.js'
+import { api, fetchAllServices } from '../api/index.js'
 
 const loading = ref(false)
 const services = ref([])
@@ -139,24 +139,34 @@ async function loadServices() {
     const data = await api.getServices(params)
     services.value = data.list
     pagination.total = data.total
+  } catch (e) {
+    // 错误由 api 拦截器统一提示
   } finally {
     loading.value = false
   }
 }
 
 async function loadStats() {
-  const [all, online, offline] = await Promise.all([
-    api.getServices({ status: 'all', page_size: 100 }),
-    api.getServices({ status: 'online', page_size: 1 }),
-    api.getServices({ status: 'offline', page_size: 1 }),
-  ])
-  stats.total = all.total
-  stats.online = online.total
-  stats.offline = offline.total
+  try {
+    const [totals, allServices] = await Promise.all([
+      Promise.all([
+        api.getServices({ status: 'all', page_size: 1 }),
+        api.getServices({ status: 'online', page_size: 1 }),
+        api.getServices({ status: 'offline', page_size: 1 }),
+      ]),
+      fetchAllServices({ status: 'all' }),
+    ])
+    const [all, online, offline] = totals
+    stats.total = all.total
+    stats.online = online.total
+    stats.offline = offline.total
 
-  const cats = new Set(all.list.map(s => s.category).filter(Boolean))
-  stats.categories = cats.size
-  categories.value = [...cats]
+    const cats = new Set(allServices.list.map(s => s.category).filter(Boolean))
+    stats.categories = cats.size
+    categories.value = [...cats]
+  } catch (e) {
+    // 错误由 api 拦截器统一提示
+  }
 }
 
 onMounted(() => {

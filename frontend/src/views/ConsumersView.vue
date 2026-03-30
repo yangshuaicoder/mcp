@@ -43,7 +43,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
-import { api } from '../api/index.js'
+import { api, fetchAllServices } from '../api/index.js'
 
 const loading = ref(false)
 const rows = ref([])
@@ -61,7 +61,7 @@ const filtered = computed(() => {
 async function load() {
   loading.value = true
   try {
-    const data = await api.getServices({ status: 'all', page_size: 100 })
+    const data = await fetchAllServices({ status: 'all' })
     const services = data.list || []
 
     const details = await Promise.all(services.map(svc => api.getServiceDetail(svc.name)))

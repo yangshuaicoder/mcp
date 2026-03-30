@@ -22,6 +22,24 @@ http.interceptors.response.use(
   }
 )
 
+// 分页拉取所有服务（突破 page_size:100 限制）
+export async function fetchAllServices(params = {}) {
+  const first = await api.getServices({ ...params, page: 1, page_size: 100 })
+  const total = first.total
+  let list = first.list || []
+
+  if (total > 100) {
+    const extraPages = Math.ceil(total / 100) - 1
+    const rest = await Promise.all(
+      Array.from({ length: extraPages }, (_, i) =>
+        api.getServices({ ...params, page: i + 2, page_size: 100 })
+      )
+    )
+    rest.forEach(r => { list = list.concat(r.list || []) })
+  }
+  return { total, list }
+}
+
 export const api = {
   // 服务列表
   getServices(params = {}) {

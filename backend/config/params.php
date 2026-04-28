@@ -1,5 +1,17 @@
 <?php
 
-return [
-    'heartbeat_timeout' => 180, // 秒：超过此时间未心跳则 offline
-];
+/**
+ * 参数配置加载器
+ * 根据服务器环境变量 APP_ENV 加载对应环境的配置文件
+ * APP_ENV=dev  -> config/dev/params.php
+ * APP_ENV=prod -> config/prod/params.php（默认）
+ */
+
+$env = getenv('APP_ENV') ?: 'prod';
+$envDir = __DIR__ . '/' . $env;
+
+if (!is_dir($envDir)) {
+    throw new \RuntimeException("配置目录不存在: config/{$env}/，请检查 APP_ENV 环境变量");
+}
+
+return require $envDir . '/params.php';
